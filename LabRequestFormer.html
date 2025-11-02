@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PGH Lab Request Former</title>
+<!-- CRITICAL FOR MOBILE RESPONSIVENESS -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* --- General Page & Input Styling (Screen View) - UPDATED FOR AESTHETICS --- */
+body {
+    font-family: 'Product sans', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    margin: 0;
+    background-color: #eef1f5; /* Lighter, modern background */
+}
+#input-section {
+    background-color: #ffffff;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Softer, larger shadow */
+    margin-bottom: 0px;
+    position: relative; 
+    border-top: 10px solid #601717; /* Accent color bar */
+    font-size: 25px;
+}
+/* New container for the form header and PDF button */
+#form-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 0px;
+    padding-top: 20px;
+}
+#form-header-container h2 {
+    color: #240303;
+    padding-bottom: 0; /* Remove padding from h2 as it's handled by the container */
+    margin-top: 0;
+    border-bottom: none; /* Remove h2's default border-bottom */
+    font-size: 24px;
+}
+#form-header-container #pdfButton {
+    display: none; /* Controlled by JS after auto-fill */
+    background-color: #dc3545;
+    margin-right: 0;
+    margin-bottom: 10px
+    padding: 10px 18px; /* Slightly smaller padding */
+    font-size: 14px;
+    border-radius: 6px;
+}
+#form-header-container #pdfButton:hover {
+    background-color: #c82333;
+}
+
+
+p {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+/* New input layout */
+.input-container-group {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    
+    /* ADDED: Visual separation for the main input columns */
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+.input-column {
+    flex: 1;
+    min-width: 0;
+    padding: 15px; 
+    /* Removed individual column border, now using the container border */
+    border: none;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Soft shadow for lift */
+}
+textarea#unstructured-input, textarea#structured-input {
+    width: 100%;
+    height: 300px; 
+    padding: 15px;
+    border: 2px solid #006025;
+    border-radius: 6px;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px; 
+    transition: border-color 0.3s;
+}
+textarea#unstructured-input {
+    font-size: 14px;
+    background-color: #f8faf9;
+}
+textarea#structured-input {
+    background-color: #f8f9fa; 
+    border: 2px solid #0056b3;
+}
+textarea#unstructured-input:focus, textarea#structured-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+.control-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0; /* Adjusted margin */
+    gap: 15px;
+}
+button {
+    padding: 12px 20px;
+    background-color: #34A853;
+    color: white;
+    border: none;
+    border-radius: 66px;
+    cursor: pointer;
+    font-weight: 600;
+    /* Removed text-transform: uppercase */
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+button:hover {
+    background-color: #34A853;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+}
+#pdfButton_OLD { /* Hide old PDF button */
+    display: none !important;
+}
+#structuredButton { /* Style for the Render button */
+    background-color: #007bff !important;
+}
+#structuredButton:hover {
+    background-color: #0056b3 !important;
+}
+.instruction-text {
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+.instruction-text2 {
+    font-size: 16px;
+    margin-top: 5px;
+    font-style: bold;
+    color:#34A853
+    
+}
+
+.instruction-text3 {
+    font-size: 16px;
+    margin-top: 5px;
+    font-style: bold;
+    color:#4285F4
+}
+
+/* API Loading Indicator Styling */
+#api-loading-status {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #007bff;
+    font-weight: 600;
+}
+.loader {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+
+
+/* Style for the floating font size input container - UPDATED */
+#global-font-setter-container {
+    position: fixed; 
+    z-index: 1000; 
+    display: none; 
+    background-color: #ffc107; /* Orange accent (Warning color) */
+    padding: 8px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    color: #343a40; /* Darker text */
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.2s ease-out; 
+    border: 1px solid #e0a800;
+}
+.font-setter-input {
+    width: 45px;
+    height: 30px;
+    padding: 3px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 15px;
+    text-align: center;
+    margin-left: 8px;
+    color: #333;
+}
+#global-font-setter-container.visible {
+    display: flex;
+    align-items: center;
+}
+
+/* --- NEW INSTRUCTION BOX STYLING --- */
+#preview-instructions {
+    background-color: #ffffff; 
+    border: 1px solid #ced4da;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+}
+#preview-instructions p {
+    margin: 5px 0;
+}
+#preview-instructions p:last-child {
+    color: #cc0000;
+    font-weight: bold;
+    margin-top: 0px;
+}
+
+
+/* --- Form Container (Screen View) - FIX APPLIED HERE --- */
+#form-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; 
+    padding: 0; 
+    justify-content: flex-start; /* Default for desktop/wide view */
+}
+.form-container {
+    background-color: #fff;
+    border: 1px solid #ccc; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 415px; 
+    min-height: 587px; 
+    position: relative;
+    overflow: hidden; 
+    border-radius: 4px;
+}
+
+/* --- Form Preview (The Image Overlay) - KEPT AS IS (CRITICAL) --- */
+.form-preview {
+    width: 100%;
+    height: 587px; 
+    background-size: contain; 
+    background-repeat: no-repeat;
+    position: relative;
+    background-image: url('single_lrf.png'); 
+    background-position: top left; 
+}
+
+/* --- UNIVERSAL COORDINATES (Keep as is) --- */
+.lrf-coords .ward-location { top: 150px; left: 8px; width: 310px; height: 26px; text-transform: uppercase;}
+.lrf-coords .patient-name { top: 190px; left: 8px; width: 310px; height: 26px; text-transform: uppercase;}
+.lrf-coords .age-sex-age { top: 225px; left: 10px; width: 50px; height: 25px; }
+.lrf-coords .age-sex-sex { top: 225px; left: 149px; width: 50px; height: 25px; }
+.lrf-coords .case-number { top: 225px; left: 232px; width: 130px; height: 25px; }
+.lrf-coords .birthday { top: 252px; left: 90px; width: 300; height: 25x; }
+.lrf-coords .diagnosis { top: 285px; left: 90px; width: 340px; height: 30px; }
+.lrf-coords .requested-by { top: 335px; left: 8px; width: 380px; height: 30px; }
+.lrf-coords .requests-field { top: 390px; left: 8px; width: 400px; height: 45px; }
+.lrf-coords .specimen-type { top: 465px; left: 8px; width: 75px; height: 30px; } 
+.lrf-coords .site-of-collection { top: 468px; left: 110px; width: 75px; height: 30px; }
+.lrf-coords .time-collected { top: 538px; left: 210px; width: 90px; height: 30px; }
+.lrf-coords .date-collected { top: 538px; left: 320px; width: 90px; height: 30px; }
+.lrf-coords .collected-by { top: 465px; left: 220px; width: 150px; height: 30px; }
+
+
+/* --- OVERLAY FIELD STYLING (Screen & Print) - KEPT ALMOST SAME (NO BREAKING CHANGES) --- */
+.overlay-field {
+    position: absolute;
+    font-family: Arial, sans-serif;
+    color: black;
+    border: 1px dashed #007bff; /* Changed dashed border color */
+    background-color: rgba(0, 123, 255, 0.1); /* Lighter, blue-tinted background */
+    padding: 0 2px;
+    box-sizing: border-box;
+    z-index: 10;
+    resize: none;
+    overflow: hidden;
+    text-align: left;
+    white-space: pre-wrap;
+    /* Font size is set by JS inline style - NO DEFAULT IN CSS */
+    transform-origin: top left;
+}
+/* Single-line fields (mostly inputs) should not wrap */
+.overlay-field:not(.diagnosis):not(.requests-field) {
+    white-space: nowrap !important;
+}
+/* Subtle outline for screen debugging */
+.form-container:hover .overlay-field {
+    border: 1px dashed rgba(0, 0, 0, 0.2);
+    transition: border 0.2s;
+}
+/* Ensure multi-line fields wrap (requests-field and diagnosis) */
+.requests-field, .diagnosis {
+    white-space: pre-wrap !important;
+}
+.requests-field, .specimen-type, .site-of-collection, .time-collected, .date-collected, .collected-by {
+    text-align: center;
+}
+
+
+/* --- NEW: MATERIALS & REMINDERS GROUP STYLING --- */
+#materials-and-reminders-group {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 0;
+    align-items: stretch; /* Stretch items to match height */
+    gap: 15px; /* Gap between the two new boxes */
+}
+
+/* Material estimation section: Fit-content width, contained in its own box */
+#materials-estimation-box {
+    width: fit-content; /* Only take the space needed for content */
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    padding: 15px;
+    
+}
+#materials-estimation {
+    /* Reset flex/width properties from old design */
+    flex: none;
+    max-width: none; 
+    padding: 0; 
+    margin: 0;
+    overflow-x: auto; 
+    min-width: 250px; /* Ensure a minimum visible size */
+}
+/* Style for the list inside materials-estimation to handle columns */
+#material-list-body-container {
+    display: flex;
+    gap: 15px; /* Spacing between columns */
+    padding: 0;
+    margin: 0;
+}
+/* Style for individual list columns (max 3 items per column) */
+.material-column {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 100px; /* Ensures columns are visible */
+}
+.material-column li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.material-column li:last-child {
+    border-bottom: none;
+}
+
+/* Reminders section: Takes up the remaining space */
+#reminders-section-box {
+    flex-grow: 1; /* Takes remaining space */
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    padding: 15px;
+}
+#reminders-section {
+    /* Reset flex/width properties from old design */
+    flex: 1;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+.separator {
+    display: none; /* Hide the separator as we now have two boxes */
+}
+
+/* Material List Styles */
+#materials-estimation h3 {
+    margin-top: 0;
+    font-size: 20px;
+}
+
+
+/* Reminders Section Styles */
+#reminders-section h3 {
+    color: #dc3545; /* Red for Warnings/Reminders */
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    border-bottom: 1px dotted #ced4da;
+    padding-bottom: 5px;
+}
+#reminders-section ul {
+    list-style: disc; /* Use discs for reminders */
+    list-style-position: inside;
+    padding-left: 20px; /* Add padding for discs */
+    margin: 0;
+    font-size: 1rem;
+}
+#reminders-section ul li {
+    padding: 3px 0;
+    color: #cc0000;
+    font-weight: 500;
+    border-bottom: none;
+}
+.critical-reminder {
+    font-weight: 700;
+    color: #cc0000;
+}
+
+
+/* Color classes for tube tops in the list - ADDED CUSTOM COLORS */
+.tube-color-RED { color: #dc3545 !important; }
+.tube-color-YELLOW { color: #ffc107 !important; }
+.tube-color-BLUE { color: #007bff !important; }
+.tube-color-PURPLE { color: #784cc9 !important; }
+.tube-color-GREEN { color: #28a745 !important; }
+.tube-color-GREY { color: #6c757d !important; }
+.tube-color-BLACK { color: #343a40 !important; }
+.tube-color-LIGHT-BLUE { color: #17a2b8 !important; }
+
+/* Custom Colors for User Request */
+.tube-color-SPECIMEN-CUP { color: #f89c00 !important; } /* Yellow-Orange/Amber */
+.tube-color-BROWN { color: #795548 !important; } /* Brown for BCS Bottles */
+
+
+/* --------------------------------------------------------------------- */
+/* --- RESPONSIVE WEB DESIGN (RWD) STYLES --- */
+/* --------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    #input-section {
+        padding: 15px;
+    }
+    
+    /* Stack the main input columns */
+    .input-container-group {
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px; /* Reduced padding for mobile density */
+    }
+    .input-column {
+        min-width: 100%;
+        padding: 15px;
+    }
+
+    /* Adjust collector input to full width */
+    #collector-control {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #collector-control input {
+        width: 100%;
+        margin-top: 5px;
+        margin-left: 0 !important;
+        box-sizing: border-box; /* Ensure padding/border doesn't overflow */
+    }
+
+    /* Stack the Materials and Reminders boxes */
+    #materials-and-reminders-group {
+        flex-direction: column;
+        padding: 0;
+        gap: 15px;
+    }
+    #materials-estimation-box, #reminders-section-box {
+        /* Force full width and remove max-width constraints */
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-grow: 1;
+        padding: 15px;
+    }
+    
+    /* Center text area for single-column mobile view */
+    textarea#unstructured-input, textarea#structured-input {
+        min-height: 200px; /* Reduced height for mobile */
+    }
+
+    /* Ensure forms are centered and wrap cleanly */
+    #form-previews {
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* Stack control row elements if needed (e.g. if button + status overflow) */
+    .control-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+
+/* --------------------------------------------------------------------- */
+/* --- PRINT STYLES: 2x2 GRID A4 (CRITICAL CHANGES) --- */
+/* --------------------------------------------------------------------- */
+@media print {
+    /* Hide the input section and controls for printing */
+    #input-section, #form-header-container, #materials-estimation-box, #reminders-section-box { display: none; } 
+    
+    /* CRITICAL: Hide the new instruction box and its content for printing */
+    #preview-instructions { display: none !important; }
+
+    /* Set 0.5 inch margins using @page */
+    @page { 
+        margin: 0.5in !important; 
+        size: A4 portrait; /* Ensure A4 size is requested */
+    }
+    
+    /* Body padding is zero, content is controlled by the @page margin */
+    body { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+    }
+    
+    #form-previews {
+        display: flex; 
+        flex-wrap: wrap;
+        
+        /* A4 Usable Area: 7.27in Wide (184.66mm) x 10.69in High (271.53mm) */
+        
+        /* Width: Target 100% of usable width (7.27in) 
+           Height: Target 100% of usable height (10.69in) */
+        width: 7.27in; 
+        height: 10.69in; 
+        
+        /* Use a minimal gap between forms for the 2x2 grid */
+        gap: 0.05in !important; 
+        padding: 0 !important;
+        margin: 0 !important;
+        
+        /* CRITICAL: Center the forms within the usable print area */
+        justify-content: center; 
+        align-items: center; 
+    }
+    
+    .form-container {
+        /* We must use a single dimension to ensure aspect ratio is maintained.
+           The form aspect ratio (H:W) is 587/415 ≈ 1.4144.
+           The usable page ratio (H:W) is 10.69/7.27 ≈ 1.469
+           Since the page ratio is slightly taller than the form ratio, we size by WIDTH.
+           
+           Target Width: ~3.6in. Target Height: 3.6in * 1.4144 ≈ 5.088in
+           This leaves extra vertical space, ensuring no forms are cut off. */
+           
+        width: 3.6in !important; /* Set width to maximize fit */
+        height: 5.088in !important; /* Set height to maintain perfect 1.4144 aspect ratio */
+        
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important; 
+    }
+    
+    /* CRITICAL: Force page break ONLY AFTER the 4th form (which is the last form on the page) */
+    .form-container:nth-child(4n) {
+        page-break-after: always !important;
+    }
+    .form-container:nth-child(4n - 3), /* Form 1 */
+    .form-container:nth-child(4n - 2), /* Form 2 */
+    .form-container:nth-child(4n - 1) { /* Form 3 */
+        page-break-after: auto !important;
+    }
+
+
+    .form-preview {
+        width: 100%; 
+        height: 100%; /* Match container height */
+        background-size: 100% 100%; /* Stretch image to fit the new proportional box exactly */
+        -webkit-print-color-adjust: exact; 
+        color-adjust: exact;
+    }
+
+    /* --- CRITICAL: RESCALE OVERLAY COORDINATES PROPORTIONALLY --- */
+    /* The screen size was 415px wide. The new print size is 3.6in.
+       Convert 3.6in to pixels (3.6 * 96 DPI) ≈ 345.6px.
+       New Scale Factor = 345.6 / 415 ≈ 0.83277 */
+    
+    .overlay-field {
+        border: none !important;
+        background-color: transparent !important;
+        color: black;
+        font-family: Arial, sans-serif; 
+        
+        transform: scale(1) !important; 
+        transform-origin: top left;
+        padding: 0 1px; 
+        position: absolute !important;
+    }
+    
+    /* Helper Mixin for Scaling:
+       New value = Old value * 0.83277 (All coordinates and sizes below calculated with this factor) */
+    
+    .lrf-coords .ward-location { top: 124.9px; left: 6.7px; width: 258.2px; height: 21.6px; text-transform: uppercase;} 
+    .lrf-coords .patient-name { top: 158.2px; left: 6.7px; width: 258.2px; height: 21.6px; text-transform: uppercase;}
+    .lrf-coords .age-sex-age { top: 187.4px; left: 8.3px; width: 41.6px; height: 20.8px; }
+    .lrf-coords .age-sex-sex { top: 187.4px; left: 124.0px; width: 41.6px; height: 20.8px; }
+    .lrf-coords .case-number { top: 187.4px; left: 193.3px; width: 108.3px; height: 20.8px; }
+    .lrf-coords .birthday { top: 209.8px; left: 74.9px; width: 249.8px; height: 20.8px; }
+    .lrf-coords .diagnosis { top: 237.4px; left: 74.9px; width: 283.1px; height: 25.0px; }
+    .lrf-coords .requested-by { top: 278.9px; left: 6.7px; width: 316.5px; height: 25.0px; }
+    .lrf-coords .requests-field { top: 324.8px; left: 6.7px; width: 333.1px; height: 37.5px; }
+    .lrf-coords .specimen-type { top: 387.3px; left: 6.7px; width: 62.5px; height: 25.0px; } 
+    .lrf-coords .site-of-collection { top: 389.8px; left: 91.6px; width: 62.5px; height: 25.0px; }
+    .lrf-coords .time-collected { top: 448.7px; left: 174.9px; width: 74.9px; height: 25.0px; }
+    .lrf-coords .date-collected { top: 448.7px; left: 266.5px; width: 74.9px; height: 25.0px; }
+    .lrf-coords .collected-by { top: 387.3px; left: 183.2px; width: 124.9px; height: 25.0px; }
+    
+    .requests-field, .diagnosis { 
+        white-space: pre-wrap !important;
+    }
+}
+</style>
+</head>
+<body>
+
+    <div id="input-section">
+        <div id="global-font-setter-container">
+        </div>
+
+        <h2><span style="color: #007bff;"></span> PGH Laboratory Request Form</h2>
+        
+        <!-- NEW COLLECTED BY INPUT FIELD -->
+        <div id="collector-control" style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background-color: #f5f5f5;">
+            <label for="collector-input" style="font-weight: bold; color: #333; font-size: 15px;">Collected By:</label>
+            <input type="text" id="collector-input" value="CLK SA" style="width: 200px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px; font-size: 14px;">
+        </div>
+        
+        <div class="input-container-group">
+            
+            <div class="input-column">
+                <p class="instruction-text2"><strong>Step 1 (Raw Input):</strong> Paste or type your raw, unstructured patient request text here:</p>
+                <textarea id="unstructured-input" placeholder="Example:
+Patient Jane Doe, 45, Ward Bed 3. Date of birth 03-10-1980. Case Number 1234567. Diagnosis is ARF from CAP-HR. Requested by Dr. Smith
+- CBC
+- Urinalysis.
+- Sputum GS/CS
+- Sputum AFB, MTBRif
+Time 11:30 am today.
+"></textarea>
+                <div class="control-row">
+                    <!-- This button now performs the API call AND renders the forms -->
+                    <button onclick="autoFillFromText()">Generate & Render Forms</button>
+                    <!-- Loading Status Display -->
+                    <div id="api-loading-status">
+                        <div class="loader"></div>
+                        <p>Processing...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-column">
+                <p class="instruction-text3"><strong>Step 2 (Optional Step):</strong> Edit the structured patient information</p>
+                <textarea id="structured-input" placeholder="The structured, pipe-delimited data will appear here after Auto-Fill. You can also paste your own structured data or manually edit the extracted data here."></textarea>
+                <div class="control-row">
+                    <!-- This button is now purely for manual refresh after edits -->
+                    <button id="structuredButton" onclick="processRequestAndShowPDFButton()">Refresh Form Previews (Manual Edit)</button>
+                    <!-- Old PDF button, hidden -->
+                    <button id="pdfButton_OLD" style="display:none;" onclick="generatePDF()">&#x1F5A8; Generate PDF (Final Step)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW MATERIALS & REMINDERS GROUP -->
+        <div id="materials-and-reminders-group" style="display: none;">
+            
+            <!-- Materials BOX: width: fit-content -->
+            <div id="materials-estimation-box">
+                <div id="materials-estimation">
+                    <h3>Estimated Materials Needed</h3>
+                    <!-- Container for columns -->
+                    <div id="material-list-body-container">
+                        <!-- Individual columns will be added here by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reminders BOX: flex-grow: 1 -->
+            <div id="reminders-section-box">
+                <div id="reminders-section">
+                    <h3>&#x26A0; Important Reminders</h3>
+                    <ul id="reminder-list-body">
+                    </ul>
+                </div>
+            </div>
+
+        </div> 
+    
+    <!-- NEW HEADER CONTAINER for PDF Button and Header Text -->
+    <div id="form-header-container">
+        <h2>Generated Form Previews</h2>
+        <button id="pdfButton" onclick="generatePDF()">&#x1F5A8; Generate PDF (Final Step)</button>
+    </div>
+    
+    <div id="preview-instructions">
+        <p class="instruction-text" style="color: #601717;">
+           <strong>•  Edit Text:</strong> Click any text box on the forms to make final adjustments.
+        </p>
+        <p class="instruction-text" style="color: #601717;">
+           <strong>•  Change Font Size:</strong> Double-click any text box. A size input will pop out next to the field. Enter a new size (10-30), then press Enter or Tab to apply.
+        </p>
+        <p class="instruction-text" style="color: #601717;">
+           <strong>•  Printing:</strong> Set scale to 88% and ensure paper size is A4 for best results. Add margins if necessary
+        </p>
+
+    </div>
+    <div id="form-previews">
+    </div>
+
+    <script>
+        // --- GEMINI API CONFIGURATION ---
+
+        // The JSON Schema must define the 15 fields expected for output
+        const JSON_SCHEMA = {
+            type: "ARRAY",
+            description: "An array where each object represents a single laboratory request form to be generated.",
+            items: {
+                type: "OBJECT",
+                description: "Details for a single lab request form.",
+                properties: {
+                    "name": { "type": "STRING", "description": "Patient's full name (LAST, FIRST MI). Must be in all caps." },
+                    "ward_location": { "type": "STRING", "description": "Ward location (e.g., ICU 3, Room 102)." },
+                    "age_sex": { "type": "STRING", "description": "Patient's age and sex, combined (e.g., '45/F' or '72/M')." },
+                    "birthday": { "type": "STRING", "description": "Patient's date of birth (MM-DD-YYYY)." },
+                    "case_number": { "type": "STRING", "description": "Patient's unique case or chart number." },
+                    "diagnosis": { "type": "STRING", "description": "Primary provisional or admitting diagnosis. Should be brief." },
+                    "requested_by": { "type": "STRING", "description": "Name of the ordering physician/requester (e.g., Dr. Smith)." },
+                    "date_collected": { "type": "STRING", "description": "Date specimen was collected (MM-DD)." },
+                    "time_collected": { "type": "STRING", "description": "Time specimen was collected (HH:MM am/pm)." },
+                    "collected_by": { "type": "STRING", "description": "Name or initials of the person who collected the specimen (e.g., Nurse J. Doe)." },
+                    "specimen_type": { "type": "STRING", "description": "Type of specimen (e.g., Blood, Urine, Sputum, Swab)." },
+                    "site_of_collection": { "type": "STRING", "description": "Anatomical or procedural site (e.g., Venipuncture, Mid-Stream, Throat)." },
+                    "form_type": { "type": "STRING", "description": "The specific laboratory section/test category this request belongs to (e.g., Hematology, Chemistry, Urinalysis, Culture)." },
+                    "tube_top": { "type": "STRING", "description": "Color of the tube top required for this test. Use 'N/A' for non-tube specimens (like Urine, Sputum, etc.). (e.g., Purple, Red, Blue, N/A)." },
+                    "requests_list": { "type": "STRING", "description": "A comma-separated list of the specific tests requested on this form (e.g., 'CBC, Platelet Count')." }
+                },
+                "required": ["name", "age_sex", "case_number", "date_collected", "specimen_type", "form_type", "requests_list"]
+            }
+        };
+
+        // WARNING: The following system instruction contains placeholders for dynamic values.
+        // It must be updated in autoFillFromText before being sent to the API.
+        const systemInstructionTemplate = `You are an expert medical data extractor. Your task is to analyze the following unstructured patient request text and convert it into a strictly structured JSON array format suitable for generating lab request forms.
+
+You MUST STRICTLY FOLLOW ALL RULES BELOW:
+
+-- Output & Formatting Rules --
+1. Output must strictly adhere to the provided JSON schema.
+2. If a field's data is missing or not applicable, use an empty string ("") as the value, EXCEPT for the date/time fields mentioned below.
+3. If multiple distinct lab requests are present (e.g., different Specimen Types or Tube Tops), generate a separate object (form) for each request.
+4. When reading the raw text, treat both **commas and line breaks** as separators between individual lab test requests.
+
+-- Field Order & Default Rules --
+- Patient Name: Use the full first and last name, but only the initial for the middle name (e.g., CABADING, LETICIA P.). Must be in ALL CAPS.
+- Age/Sex: Use the format [Age Number]/[M or F] (e.g., 54/F).
+- Collected By: Must be set to the default value: "__COLLECTOR_DEFAULT__".
+- Date Collected: Must be set to today's date: "__DATE_DEFAULT__".
+- Time Collected: Only extract if explicitly specified in the RAW TEXT, otherwise use an empty string("").
+
+-- Specimen Grouping Rules (CRITICAL) --
+- BLOOD Specimens: Group multiple tests onto one output line only if they share the **same Tube Top AND Form Type** (consult the LAB TEST LOOKUP TABLE). Otherwise, they must be separated.
+- NON-BLOOD Specimens (General Rule): Each individual test must be listed on a SEPARATE output object/form, even if they share the same Specimen Type and Form Type.
+- Sputum/ETA Exception: Sputum GS/CS, Sputum AFB, and Sputum MTBRif (TB PCR / MTB-RIF PCR) can be grouped onto a single output object under the Form Type: Microbiology/MRL. If grouped, the requests_list MUST be output as 'Sputum GS/CS, AFB, MTBRif'.
+- Urine Chemistry Exception: All Urine Chemistry tests must be grouped onto a single output object under the Chemistry Form Type.
+
+-- Lab Requests (Test Name) Rules --
+- Test Name Format: Use specified shortcuts (e.g., Na, K, Crea, CBC, TB, DB, IB, BUA, Trop I, Vanco Trough) from the lookup table.
+- Specimen Prefix Rule (Non-Blood): For all non-blood specimens (Stool, Sputum, CSF, etc.), prefix the test name with the Specimen Type (e.g., Stool DFS).
+- Urinalysis Exception: If any test from the Urinalysis Form is requested, the Lab Requests field for that line must contain only the word: Urinalysis. Do not include the "Urine" prefix.
+- Urine Chemistry Prefix: All other Urine tests (e.g., Chemistry, Microbiology) must use the Urine prefix (e.g., Urine Na, Urine Crea, Urine GS/CS).
+
+-- LAB TEST LOOKUP TABLE (Table Basis) --
+Test Name|Specimen|Top|Form Type
+Na|Blood|Red|Chemistry
+K|Blood|Red|Chemistry
+Cl|Blood|Red|Chemistry
+Ca|Blood|Red|Chemistry
+Mg|Blood|Red|Chemistry
+PO4|Blood|Red|Chemistry
+FBS|Blood|Red|Chemistry
+Triglycerides|Blood|Red|Chemistry
+Total cholesterol|Blood|Red|Chemistry
+LDL|Blood|Red|Chemistry
+HDL|Blood|Red|Chemistry
+AST|Blood|Red|Chemistry
+ALT|Blood|Red|Chemistry
+TB|Blood|Red|Chemistry
+DB|Blood|Red|Chemistry
+IB|Blood|Red|Chemistry
+GGT|Blood|Red|Chemistry
+ALP|Blood|Red|Chemistry
+TPAG|Blood|Red|Chemistry
+LDH|Blood|Red|Chemistry
+BUN|Blood|Red|Chemistry
+Crea|Blood|Red|Chemistry
+Amylase|Blood|Red|Chemistry
+Lipase|Blood|Red|Chemistry
+Albumin|Blood|Red|Chemistry
+BUA|Blood|Red|Chemistry
+Trop I|Blood|Red|Chemistry
+CK-Total|Blood|Red|Chemistry
+CK-MB|Blood|Red|Chemistry
+NT-PROBNP|Blood|Red|Chemistry
+Vanco Trough|Blood|Red|Chemistry
+Phenobarbital Assay|Blood|Red|Chemistry
+Serum Iron|Blood|Red|Chemistry
+dTIBC|Blood|Red|Chemistry
+Ferritin|Blood|Red|Chemistry
+TCO2|Blood|Red|Chemistry
+PSA|Blood|Red|Chemistry
+CRP|Blood|Red|Immunopathology
+CA-125|Blood|Red|Immunopathology
+BHCG|Blood|Red|Immunopathology
+HBsAg|Blood|Red|Immunopathology
+Anti-HBs|Blood|Red|Immunopathology
+Anti-HBc Total|Blood|Red|Immunopathology
+HBeAg|Blood|Red|Immunopathology
+Anti-HBe|Blood|Red|Immunopathology
+Anti-HAV IgM|Blood|Red|Immunopathology
+Anti-HCV|Blood|Red|Immunopathology
+Anti-HBc IgM|Blood|Red|Immunopathology
+Procalcitonin|Blood|Red|Immunopathology
+AFP|Blood|Red|Immunopathology
+CA 19-9|Blood|Red|Immunopathology
+CEA|Blood|Red|Immunopathology
+HE 4|Blood|Red|Immunopathology
+TSH|Blood|Red|Immunopathology
+Free T3|Blood|Red|Immunopathology
+Free T4|Blood|Red|Immunopathology
+Dengue IgG|Blood|Red|Immunopathology
+Dengue IgM|Blood|Red|Immunopathology
+Dengue NS1 Ag|Blood|Red|Immunopathology
+Leptospira IgG (rapid)|Blood|Red|Immunopathology
+Leptospira IgM (rapid)|Blood|Red|Immunopathology
+Cortisol|Blood|Red|Nuclear Medicine
+25-Hydroxy Vit D|Blood|Red|Nuclear Medicine
+iPTH|Blood|Red|Nuclear Medicine
+Aldosterone|Blood|Red|Nuclear Medicine
+Anti-TPO|Blood|Red|Nuclear Medicine
+ANA|Blood|Red|MRL
+Anti-dsDNA|Blood|Red|MRL
+Anti-Smith (SM)|Blood|Red|MRL
+Anti U1RNP|Blood|Red|MRL
+Anti Ro/SSA|Blood|Red|MRL
+Anti La/SSB|Blood|Red|MRL
+Anti SCL70|Blood|Red|MRL
+Anti Jo1|Blood|Red|MRL
+P-ANCA (MPO)|Blood|Red|MRL
+C-ANCA (PR3)|Blood|Red|MRL
+Anti CCP|Blood|Red|MRL
+Anti-Beta2 Glycoprotein|Blood|Red|MRL
+Anticardiolipin Ab (ACA)|Blood|Red|MRL
+C3|Blood|Red|MRL
+Serum Igs|Blood|Red|MRL
+CALAS (Serum)|Blood|Red|MRL
+Lepto MAT|Blood|Red|MRL
+Serum FLC|Blood|Red|MRL
+ICC ELISA|Blood|Red|SAGIP
+PTT|Blood|Blue|Hematology
+PT|Blood|Blue|Hematology
+Factor VIII|Blood|Blue|Hematology
+Factor IX|Blood|Blue|Hematology
+Fibrinogen|Blood|Blue|Hematology
+D-Dimer|Blood|Blue|Hematology
+Protein C|Blood|Blue|Hematology
+Protein S|Blood|Blue|Hematology
+APAS Panel|Blood|Blue (+ Red)|MRL
+Antithrombin III|Blood|Blue|MRL
+Factor VIII Inhibitor|Blood|Blue|MRL
+Factor XI|Blood|Blue|MRL
+Lupus Anticoagulant (SCT)|Blood|Blue|MRL
+Lupus Anticoagulant (DRVVT)|Blood|Blue|MRL
+iCa|Blood|Green|Chemistry
+NH3|Blood|Green|Chemistry
+Lactate|Blood|Green|Chemistry
+Plasma K|Blood|Green|Chemistry
+Lepto Culture|Blood|Green|MRL
+CBC|Blood|Purple|Hematology
+ESR|Blood|Purple|Hematology
+PBS|Blood|Purple|Hematology
+RC|Blood|Purple|Hematology
+Diff Count|Blood|Purple|Hematology
+Hct|Blood|Purple|Hematology
+Hgb|Blood|Purple|Hematology
+Plt Count|Blood|Purple|Hematology
+Filarial Smear|Blood|Purple|Hematology
+Malarial Smear|Blood|Purple|Hematology
+HbA1c|Blood|Purple|Chemistry
+G6PD|Blood|Purple|Chemistry
+Tacrolimus|Blood|Purple|Immunopathology
+Blood Typing|Blood|Purple|Blood Bank
+Cross-matching|Blood|Purple|Blood Bank
+Coombs Test|Blood|Purple|Blood Bank
+Renin|Blood|Purple|Nuclear Medicine
+ACTH|Blood|Purple|Nuclear Medicine
+CD4|Blood|Purple|SAGIP
+Viral Load|Blood|Purple|SAGIP
+Resistance Test|Blood|Purple|SAGIP
+Blood CS|Blood|Special Bottle|Microbiology
+IGRA|Blood|4 Special Tubes|Immunopathology
+UA|Urine|N/A|Urinalysis
+PT (urine)|Urine|N/A|Urinalysis
+UA Albumin|Urine|N/A|Urinalysis
+UA Bilirubin|Urine|N/A|Urinalysis
+UA Hgb|Urine|N/A|Urinalysis
+UA Ketone|Urine|N/A|Urinalysis
+UA Leukocyte|Urine|N/A|Urinalysis
+UA Myoglobin|Urine|N/A|Urinalysis
+UA Nitrite|Urine|N/A|Urinalysis
+UA pH|Urine|N/A|Urinalysis
+UA RBC Morph|Urine|N/A|Urinalysis
+UA Sugar|Urine|N/A|Urinalysis
+UA Spec Grav|Urine|N/A|Urinalysis
+UA Urobilinogen|Urine|N/A|Urinalysis
+Urine Amylase|Urine|N/A|Chemistry
+Urine Ca|Urine|N/A|Chemistry
+Urine Cl|Urine|N/A|Chemistry
+Urine Crea|Urine|N/A|Chemistry
+Urine Microalbumin|Urine|N/A|Chemistry
+Urine Mg|Urine|N/A|Chemistry
+Urine PO4|Urine|N/A|Chemistry
+Urine K|Urine|N/A|Chemistry
+Urine Na|Urine|N/A|Chemistry
+Urine TP|Urine|N/A|Chemistry
+Urine Glucose/Sugar (Quant)|Urine|N/A|Chemistry
+Urine Urea N|Urine|N/A|Chemistry
+Urine Uric Acid|Urine|N/A|Chemistry
+Urine Protein Electrophoresis|Urine|N/A|Chemistry
+Urine GS/CS|Urine|N/A|Microbiology
+Urine Wright Stain|Urine|N/A|MRL
+Urine Micral Test|Urine|N/A|MRL
+Urine Metanephrine|Urine|N/A|MRL
+CSF Albumin|CSF|N/A|Chemistry
+CSF Cholesterol|CSF|N/A|Chemistry
+CSF Crea|CSF|N/A|Chemistry
+CSF LDH|CSF|N/A|Chemistry
+CSF Sugar|CSF|N/A|Chemistry
+CSF TP|CSF|N/A|Chemistry
+CSF TG|CSF|N/A|Chemistry
+CSF Quali|CSF|N/A|Clinical Microscopy
+CSF RBC Count|CSF|N/A|Clinical Microscopy
+CSF Spec Grav|CSF|N/A|Clinical Microscopy
+CSF Bactigen|CSF|N/A|Immunopathology
+CSF CALAS|CSF|N/A|Immunopathology
+CSF Rubeola IgG|CSF|N/A|Immunopathology
+CSF GS/CS|CSF|N/A|Microbiology
+AFB (CSF)|CSF|N/A|Microbiology
+TB CS (CSF)|CSF|N/A|Microbiology
+India Ink (CSF)|CSF|N/A|Microbiology
+Fungal CS (CSF)|CSF|N/A|Microbiology
+Anaerobic Culture (CSF)|CSF|N/A|Microbiology
+Gram Stain (CSF)|CSF|N/A|Microbiology
+KOH Mount (CSF)|CSF|N/A|Microbiology
+SLIDEX (CSF)|CSF|N/A|MRL
+TB PCR (CSF)|CSF|N/A|MRL
+MTB/Rif (CSF)|CSF|N/A|MRL
+TB GeneXpert (CSF)|CSF|N/A|MRL
+HSV PCR (CSF)|CSF|N/A|MRL
+Cytology (CSF)|CSF|N/A|Surgical Pathology
+DFS (w/ Conc)|Stool|N/A|Clinical Microscopy
+FIT|Stool|N/A|Clinical Microscopy
+FOBT|Stool|N/A|Clinical Microscopy
+Crypto/Giardia Ag|Stool|N/A|Clinical Microscopy
+C. difficile Ag|Stool|N/A|Clinical Microscopy
+E. Histiolytica Ag|Stool|N/A|Clinical Microscopy
+Rotavirus Ag|Stool|N/A|Clinical Microscopy
+Stool/Rectal Swab GS/CS|Stool|N/A|Microbiology
+C. difficile PCR|Stool|N/A|Microbiology
+AFB (Sputum)|Sputum|N/A|Microbiology
+AFB CS / TB CS (Sputum)|Sputum|N/A|Microbiology
+TB PCR / MTB-RIF PCR (Sputum)|Sputum|N/A|MRL
+RT GS/CS|Sputum|N/A|Microbiology
+Fungal CS (Sputum)|Sputum|N/A|Microbiology
+Gram Stain (Sputum)|Sputum|N/A|Microbiology
+KOH Mount (Sputum)|Sputum|N/A|Microbiology
+Iron Stain (BM)|Bone Marrow|N/A|MRL
+MPO (BM)|Bone Marrow|N/A|MRL
+PAS (BM)|Bone Marrow|N/A|MRL
+TB C/S (BM)|Bone Marrow|Green|MRL
+TB PCR (BM)|Bone Marrow|Purple|MRL
+Quant (TP, Gluc) (BF)|Body Fluid|N/A|Chemistry
+LDH (BF)|Body Fluid|N/A|Chemistry
+Albumin (BF)|Body Fluid|N/A|Chemistry
+Quali (Cell Cnt, Diff) (BF)|Body Fluid|N/A|Clinical Microscopy
+Direct Wet Mount (BF)|Body Fluid|N/A|Clinical Microscopy
+RBC Morph (BF)|Body Fluid|N/A|Clinical Microscopy
+pH (BF)|Body Fluid|N/A|Clinical Microscopy
+Spec Grav (BF)|Body Fluid|N/A|Clinical Microscopy
+Seminalysis|Semen|N/A|Clinical Microscopy
+Test for Crystals (SF)|Synovial Fluid|N/A|Clinical Microscopy
+Washing Analysis (VF)|Vaginal Fluid|N/A|Clinical Microscopy
+Ferning Test (VF)|Vaginal Fluid|N/A|Clinical Microscopy
+GSCS (BF)|Body Fluid|N/A|Microbiology
+AFB (BF)|Body Fluid|N/A|Microbiology
+TB CS (BF)|Body Fluid|N/A|Microbiology
+Anaerobic Culture (BF)|Body Fluid|N/A|Microbiology
+Fungal CS (BF)|Body Fluid|N/A|Microbiology
+India Ink (BF)|Body Fluid|N/A|Microbiology
+KOH Mount (BF)|Body Fluid|N/A|Microbiology
+Gram Stain (Exudate)|Exudate|N/A|Microbiology
+TMG Smear|Vaginal Swab|N/A|Microbiology
+Catheter Tip CS|Catheter Tip|N/A|Microbiology
+Conjunctival/Corneal Scraping GS/CS|Corneal Scraping|N/A|Microbiology
+Cytology (BF)|Body Fluid|N/A|Surgical Pathology
+TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
+        
+        // --- CONSTANTS AND CONFIGURATION ---
+        const FIELD_KEYS = [
+            'name', 'ward_location', 'age_sex', 'birthday', 'case_number', 'diagnosis', 
+            'requested_by', 'date_collected', 'time_collected', 'collected_by',
+            'specimen_type', 'site_of_collection' 
+        ];
+        
+        const CUP_SPECIMENS = ['sputum', 'stool', 'urine']; // Specimen types that use one cup per form
+        
+        // Configuration for all fields, including the defaultFontSize property
+        const renderFields = [
+            // Class Name, Data Key, Display Title, Element Type, Default Font Size (in px)
+            { class: 'patient-name', key: 'name', title: 'NAME', defaultFontSize: 16 },
+            { class: 'ward-location', key: 'ward_location', title: 'WARD/LOCATION', defaultFontSize: 16 },
+            { class: 'case-number', key: 'case_number', title: 'CASE NO.', defaultFontSize: 16 },
+            { class: 'birthday', key: 'birthday', title: 'BIRTH DATE', defaultFontSize: 16 },
+            { class: 'diagnosis', key: 'diagnosis', title: 'DIAGNOSIS', element: 'textarea', defaultFontSize: 16, isMultiLine: true }, 
+            { class: 'requested-by', key: 'requested_by', title: 'REQUESTED BY', defaultFontSize: 16 }, 
+            { class: 'collected-by', key: 'collected_by', title: 'COLLECTED BY', defaultFontSize: 23 },
+            { class: 'date-collected', key: 'date_collected', title: 'DATE COLLECTOED', defaultFontSize: 16 },
+            { class: 'time-collected', key: 'time_collected', title: 'TIME COLLECTED', defaultFontSize: 16 },
+            { class: 'specimen-type', key: 'specimen_type', title: 'SPECIMEN TYPE', defaultFontSize: 16 },
+            { class: 'site-of-collection', key: 'site_of_collection', title: 'SITE OF COLLECTION', defaultFontSize: 16 },
+            // Default size for special fields (used if no inline style exists)
+            { class: 'age-sex-age', defaultFontSize: 16 },
+            { class: 'age-sex-sex', defaultFontSize: 16 },
+            { class: 'requests-field', defaultFontSize: 16, isMultiLine: true }, 
+        ];
+        
+        // Store the reference to the currently focused field globally
+        let currentlyFocusedField = null;
+
+        // --- NUCMED Schedule Data ---
+        // Changed "25-Hydroxy Vit D" key to "VIT D" for shorthand matching
+        const NUCMED_SCHEDULE = {
+            "FREE T4": { schedule: "Everyday" },
+            "TSH": { schedule: "Everyday" },
+            "FREE T3": { schedule: "M,W,F", note: "Fasting for 8-12 hrs" },
+            "CORTISOL": { schedule: "M,W,F", note: "Fasting for 8-12 hrs" },
+            "PROLACTIN": { schedule: "M,W,F" },
+            "VIT D": { schedule: "M,W" },
+            "IPTH": { schedule: "M,W" },
+            "HCG": { schedule: "M,Th" },
+            "17A-HYDROXYPROGESTERONE": { schedule: "M,Th" },
+            "ANTI-THYROGLOBULIN ANTIBODY": { schedule: "T,Th" },
+            "ANTI-TPO": { schedule: "T,Th" },
+            "TESTOSTERONE": { schedule: "T,Th" },
+            "THYROGLOBULIN": { schedule: "T,Th" },
+            "DHEAS": { schedule: "Mondays only" },
+            "TRAB": { schedule: "Last Monday of the Month" },
+            "HGH": { schedule: "Tuesdays only", note: "Fasting for 8-12 hours" },
+            "IGF-1": { schedule: "Tuesdays only" },
+            "INSULIN": { schedule: "Wednesdays only", note: "Fasting for 8-12 hours" },
+            "C-PEPTIDE": { schedule: "Wednesdays only", note: "Fasting for 8-12 hours" },
+            "FSH": { schedule: "Wednesdays only" },
+            "LUTEINIZING HORMONE": { schedule: "Wednesdays only" },
+            "ALDOSTERONE": { schedule: "Fridays only" },
+            "RENIN": { schedule: "Fridays only", note: "Fasting for 8-12 hours" },
+            "ESTRADIOL": { schedule: "Fridays only" },
+            "ACTH": { schedule: "Fridays only", note: "Fasting for 8-12 hours" }
+        };
+        
+        // --- MRL Schedule Data ---
+        const MRL_TB_TESTS = {
+            "TB PCR": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "MTB/RIF": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "TB GENEXPERT": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "HSV PCR": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "TB PCR (CSF)": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "MTB/RIF (CSF)": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "TB GENEXPERT (CSF)": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "HSV PCR (CSF)": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "TB PCR (BM)": { schedule: "M,F", note: "Requires TB-DOTS Referral" },
+            "TB PCR / MTB-RIF PCR (SPUTUM)": { schedule: "M,F", note: "Requires TB-DOTS Referral" }, 
+            "TB PCR / MTB/RIF / GENEXPERT (BF)": { schedule: "M,F", note: "Requires TB-DOTS Referral" }
+        };
+
+        // Map day index (0=Sun, 1=Mon... 6=Sat) to schedule key abbreviations
+        const DAY_ABBREVIATIONS = {
+            1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'Sa', 0: 'Su'
+        };
+
+        // --- UTILITY FUNCTIONS ---
+        
+        /**
+         * Get the current date in MM-DD format.
+         */
+        function getCurrentDateMMDD() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${month}-${day}`;
+        }
+
+        function formatMultiLineText(text, isRequestsList = false) {
+            if (!text) return '';
+            
+            // If it's the requests list, return the text trimmed 
+            if (isRequestsList) {
+                return text.trim();
+            }
+
+            // Original logic for multi-line fields (like Diagnosis)
+            if (text.length > 40 && text.includes(',')) {
+                return text.replace(/, /g, '\n');
+            }
+            return text;
+        }
+
+        function cleanAgeSex(ageSexString) {
+            if (!ageSexString) return { age: '', sex: '' };
+            let cleaned = ageSexString.toLowerCase().replace(/years old/g, '').trim();
+
+            if (cleaned.includes('/')) {
+                let parts = cleaned.split('/');
+                return { age: parts[0].trim(), sex: parts[1].trim().toUpperCase() };
+            } else if (cleaned.includes(',')) {
+                let parts = cleaned.split(',');
+                return { age: parts[0].trim(), sex: parts[1].trim().toUpperCase() };
+            } else {
+                let parts = cleaned.split(' ');
+                let sex = parts.pop().toUpperCase(); 
+                let age = parts.join(' ');
+                return { age: age.trim(), sex: sex };
+            }
+        }
+        
+        /**
+         * Finds the config object for an element based on its class name.
+         */
+        function getConfigForElement(element) {
+            const className = element.className.split(' ').find(cls => renderFields.some(f => f.class === cls));
+            return renderFields.find(f => f.class === className);
+        }
+
+        /**
+         * Dynamic Shrink-to-Fit for an overlay field.
+         * @param {HTMLElement} element The field to adjust.
+         * @param {number} baseFontSize The desired font size before shrinking.
+         */
+        function shrinkToFit(element, baseFontSize) {
+            const minFontSize = 10;     
+            let currentFontSize = baseFontSize;
+            const config = getConfigForElement(element);
+            const isMultiLine = config && config.isMultiLine;
+
+            const style = window.getComputedStyle(element);
+            const fieldWidth = parseFloat(style.width);
+            const fieldHeight = parseFloat(style.height);
+
+            if (fieldWidth <= 0 || fieldHeight <= 0) {
+                element.style.fontSize = baseFontSize + 'px'; 
+                element.setAttribute('data-base-size', baseFontSize);
+                return; 
+            }
+
+            const tempDiv = document.createElement('div');
+            tempDiv.style.visibility = 'hidden';
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.fontFamily = style.fontFamily;
+            tempDiv.style.padding = style.padding; 
+            tempDiv.style.border = 'none';
+            tempDiv.style.boxSizing = style.boxSizing;
+            
+            // Set text content
+            tempDiv.textContent = element.value || element.textContent;
+
+            // Apply slight padding to the virtual container to simulate browser rendering buffer (FIX FOR OVERFLOW)
+            // Increased buffer slightly for better aggressive shrinking
+            const buffer = 2; 
+
+            if (!isMultiLine) {
+                 tempDiv.style.whiteSpace = 'nowrap';
+            } else {
+                // Ensure the temp element respects the field width
+                tempDiv.style.width = (fieldWidth - (2 * buffer)) + 'px'; 
+                tempDiv.style.whiteSpace = 'pre-wrap';
+            }
+            
+            document.body.appendChild(tempDiv);
+            
+            let overflow = true;
+            while (overflow && currentFontSize >= minFontSize) {
+                tempDiv.style.fontSize = currentFontSize + 'px';
+                
+                if (!isMultiLine) {
+                    // Check horizontal overflow (with buffer)
+                    if (tempDiv.scrollWidth <= (fieldWidth - buffer)) {
+                        overflow = false;
+                    }
+                } else {
+                    // Check vertical overflow (with buffer)
+                    if (tempDiv.scrollHeight <= (fieldHeight - buffer)) {
+                        overflow = false;
+                    }
+                }
+                
+                if (overflow) {
+                    currentFontSize -= 1; 
+                }
+            }
+
+            element.style.fontSize = currentFontSize + 'px';
+            element.setAttribute('data-base-size', baseFontSize);
+            document.body.removeChild(tempDiv);
+        }
+        
+        // --- MANUAL FONT SIZE HANDLERS ---
+        
+        // Function to apply the font size change
+        function applyFontSizeChange() {
+            const inputSetter = document.getElementById('manual-font-size-input');
+            const element = currentlyFocusedField;
+
+            if (!inputSetter || !element) {
+                hideFontSizeSetter();
+                return;
+            }
+
+            const newSize = parseInt(inputSetter.value);
+            // Apply shrinkToFit only if the size is valid and within range
+            if (newSize && newSize >= 10 && newSize <= 30) {
+                // 1. Permanently store the new size on the element
+                element.setAttribute('data-base-size', newSize);
+                
+                // 2. Re-apply the shrink-to-fit logic using the new size
+                shrinkToFit(element, newSize);
+            }
+            // Hide the input after application
+            hideFontSizeSetter();
+        }
+
+        // Function to hide the font size setter UI
+        function hideFontSizeSetter() {
+            const container = document.getElementById('global-font-setter-container');
+            container.classList.remove('visible');
+            container.innerHTML = '';
+            currentlyFocusedField = null;
+        }
+
+
+        /**
+         * Shows the temporary input field using fixed positioning near the focused element.
+         * @param {HTMLElement} element The input/textarea that was clicked.
+         */
+        function showFontSizeSetter(element) {
+            const container = document.getElementById('global-font-setter-container');
+            
+            // Check if another element is focused (unlikely with dblclick, but good practice)
+            if (currentlyFocusedField && currentlyFocusedField !== element) {
+                 hideFontSizeSetter();
+            }
+
+            currentlyFocusedField = element;
+            
+            // 1. Get current position of the focused element
+            const rect = element.getBoundingClientRect();
+            
+            // 2. Calculate new fixed position (just to the right of the element)
+            const leftPosition = rect.right + 10;
+            const topPosition = rect.top;
+
+            // 3. Update container CSS
+            container.style.left = leftPosition + 'px';
+            container.style.top = topPosition + 'px';
+            container.classList.add('visible'); // Show the container
+
+            // 4. Populate and focus the input
+            container.innerHTML = '';
+            // Get the base size (either from data-attribute or config default)
+            const currentBaseSize = parseInt(element.getAttribute('data-base-size')) || getConfigForElement(element).defaultFontSize;
+            
+            const title = document.createElement('span');
+            title.textContent = element.title + ' Base Size:'; 
+            
+            const inputSetter = document.createElement('input');
+            inputSetter.type = 'number';
+            inputSetter.id = 'manual-font-size-input'; // Unique ID
+            inputSetter.className = 'font-setter-input';
+            inputSetter.value = currentBaseSize;
+            inputSetter.min = 10;
+            inputSetter.max = 30;
+
+            container.appendChild(title);
+            container.appendChild(inputSetter);
+            
+            // Set focus and event listeners on the newly created input
+            setTimeout(() => inputSetter.focus(), 0);
+
+            inputSetter.addEventListener('blur', applyFontSizeChange);
+            inputSetter.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    applyFontSizeChange();
+                    // Attempt to return focus to the original text box
+                    currentlyFocusedField.focus(); 
+                }
+            });
+        }
+        
+        // --- CORE RENDER FUNCTIONS ---
+        
+        /**
+         * NEW: Applies the shrink-to-fit logic to all rendered fields in the DOM.
+         */
+        function applyAllShrinkToFit() {
+            const fields = document.querySelectorAll('.overlay-field');
+            fields.forEach(field => {
+                // Read the base size stored during creation or previous manual edit
+                const baseSize = parseInt(field.getAttribute('data-base-size')) || 16; 
+                shrinkToFit(field, baseSize);
+            });
+        }
+
+
+        /**
+         * The new entry point for Auto-Fill, calling the Gemini API.
+         */
+        async function autoFillFromText() {
+            const unstructuredText = document.getElementById('unstructured-input').value.trim();
+            const structuredInputArea = document.getElementById('structured-input'); // Renamed
+            const previewsDiv = document.getElementById('form-previews');
+            const loadingStatus = document.getElementById('api-loading-status');
+            
+            // Reset state that changes on auto-fill attempt
+            previewsDiv.innerHTML = '';
+            document.getElementById('pdfButton').style.display = 'none';
+            document.getElementById('materials-and-reminders-group').style.display = 'none';
+
+            if (!unstructuredText) {
+                structuredInputArea.value = '';
+                previewsDiv.innerHTML = `<p style="color:red; font-size: 1.2rem; padding: 20px;">
+                    ERROR: Please enter unstructured patient request text into the input box first.</p>`;
+                return;
+            }
+
+            // --- New: Dynamic Date and Collector Value ---
+            const dynamicDate = getCurrentDateMMDD();
+            const collectorInput = document.getElementById('collector-input').value.trim().toUpperCase() || "CLK SA";
+            
+            // Update the system instruction template with dynamic values
+            const dynamicSystemInstruction = systemInstructionTemplate
+                .replace("__COLLECTOR_DEFAULT__", collectorInput)
+                .replace("__DATE_DEFAULT__", dynamicDate);
+            
+            // --- CRITICAL API KEY CHECK ---
+            const apiKey = "AIzaSyCbXHcghf5sGEfC1OV6zngroFML3lCnC1I"; // This is intentionally left blank for the environment to inject it.
+            if (typeof __api_key === 'undefined' && apiKey === "") {
+                 previewsDiv.innerHTML = `<p style="color:red; font-size: 1.2rem; padding: 20px;">
+                    **AUTHORIZATION ERROR:** The Gemini API key is missing. The environment must provide a key for the Auto-Fill feature to work.</p>`;
+                return;
+            }
+
+            // Display loading indicator (beside button)
+            loadingStatus.style.display = 'flex';
+            structuredInputArea.value = "Processing data...";
+            previewsDiv.innerHTML = ''; // Clear previous preview error/message
+
+            const userQuery = unstructuredText;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: dynamicSystemInstruction }] }, // Use dynamic instruction here
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: JSON_SCHEMA
+                }
+            };
+
+            let responseJson;
+            let maxRetries = 3;
+            let delay = 1000;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        // Handle 403 specifically to provide a clear error message
+                        if (response.status === 403) {
+                             throw new Error("403 Forbidden: Check API key configuration or service access.");
+                        }
+                        
+                        if (response.status === 429 && i < maxRetries - 1) { 
+                            // Only console warn for retries, do not show alert to user
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2; // Exponential backoff
+                            continue;
+                        }
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!jsonText) throw new Error("API returned an empty or malformed JSON response.");
+
+                    responseJson = JSON.parse(jsonText);
+                    
+                    // Conversion to pipe-delimited format (15 fields)
+                    let pipeDelimitedOutput = '';
+                    
+                    if (Array.isArray(responseJson)) {
+                        responseJson.forEach(item => {
+                            // Enforce custom/default collector and dynamic date in post-processing if needed
+                            item.collected_by = item.collected_by || collectorInput;
+                            item.date_collected = item.date_collected || dynamicDate;
+
+                            const line = [
+                                item.name || '',
+                                item.ward_location || '',
+                                item.age_sex || '',
+                                item.birthday || '',
+                                item.case_number || '',
+                                item.diagnosis || '',
+                                item.requested_by || '',
+                                item.date_collected || '',
+                                item.time_collected || '',
+                                item.collected_by || '',
+                                item.specimen_type || '',
+                                item.site_of_collection || '',
+                                item.form_type || '',
+                                item.tube_top || '',
+                                item.requests_list || '' 
+                            ].join('|');
+                            pipeDelimitedOutput += line + '\n';
+                        });
+                    } else {
+                        throw new Error("JSON result is not a valid array structure.");
+                    }
+                    
+                    structuredInputArea.value = pipeDelimitedOutput.trim();
+
+                    // Hide loading indicator
+                    loadingStatus.style.display = 'none';
+                    
+                    // CRITICAL CHANGE: Immediately render the forms after auto-fill
+                    processRequestAndShowPDFButton();
+                    
+                    return; 
+
+                } catch (error) {
+                    // Update user display with the specific error
+                    structuredInputArea.value = '';
+                    loadingStatus.style.display = 'none';
+                    previewsDiv.innerHTML = `<p style="color:red; font-size: 1.2rem; padding: 20px;">
+                        An error occurred during data extraction: **${error.message}**. Please check your input and try again.</p>`;
+                    console.error('Gemini Auto-Fill Error:', error);
+                    return;
+                }
+            }
+        }
+        
+        /**
+         * Checks if a test is available today based on the provided schedule map.
+         * @param {string} testName The name of the test.
+         * @param {number} currentDay The current day index (1=Mon, 5=Fri).
+         * @param {Object} scheduleMap The map containing test schedules (NUCMED or MRL).
+         * @returns {string} The availability status.
+         */
+        function checkGenericTestAvailability(testName, currentDay, scheduleMap) {
+            const scheduleEntry = scheduleMap[testName];
+            if (!scheduleEntry) {
+                return `Schedule Unknown`;
+            }
+            
+            const schedule = scheduleEntry.schedule;
+            const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentDay];
+
+            if (schedule === 'Everyday') {
+                return `AVAILABLE DAILY`;
+            }
+
+            const dayAbbrev = DAY_ABBREVIATIONS[currentDay];
+            
+            // 1. Check for single-day schedules (e.g., 'Mondays only', 'Fridays only')
+            if (schedule.includes('only')) {
+                if (schedule.includes(dayName)) {
+                    // Specific check for 'Last Monday of the Month'
+                    if (schedule.includes('Last Monday')) {
+                        const now = new Date();
+                        const date = now.getDate();
+                        const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                        const isLastMonday = (currentDay === 1 && date > lastDayOfMonth - 7);
+                        return isLastMonday ? `AVAILABLE TODAY (${schedule})` : `NOT AVAILABLE TODAY (${schedule})`;
+                    }
+                    return `AVAILABLE TODAY (${schedule})`;
+                }
+                return `NOT AVAILABLE TODAY (${schedule})`;
+            }
+
+            // 2. Check for comma-separated schedules (e.g., M, W, F)
+            if (schedule.includes(dayAbbrev)) {
+                return `AVAILABLE TODAY (${schedule})`;
+            }
+
+            return `NOT AVAILABLE TODAY (${schedule})`;
+        }
+
+
+        /**
+         * Collects NUCMED-specific reminders and operational status.
+         */
+        function checkNucMedStatus(forms, reminders) {
+            const now = new Date();
+            const currentHour = now.getHours(); 
+            const currentDay = now.getDay(); // 0=Sun, 1=Mon... 6=Sat
+            
+            // 1. Check NUCMED opening hours (7-9 AM)
+            const nuchemedOpen = (currentHour >= 7 && currentHour < 9);
+            const timeStatus = nuchemedOpen ? 
+                `NUCMED IS OPEN (Collection: 7:00 AM - 9:00 AM)` : 
+                `NUCMED IS CLOSED (Collection: 7:00 AM - 9:00 AM)`;
+            
+            let hasNucMedRequest = false;
+            const nucMedTestReminders = new Set();
+
+            // 2. Check test availability
+            forms.forEach(form => {
+                if (form.form_type.toUpperCase() === 'NUCLEAR MEDICINE') {
+                    hasNucMedRequest = true;
+                    
+                    const requestedTests = form.requests_list.toUpperCase().split(',').map(t => t.trim()).filter(t => t.length > 0);
+                    
+                    // Map long test names to shorthand for checking
+                    const longToShortMap = {
+                        "25-HYDROXY VIT D": "VIT D",
+                    };
+                    
+
+                    requestedTests.forEach(test => {
+                        let cleanTest = test.replace(/^\[STAT\]\s*/, '').trim(); 
+                        
+                        // Use shorthand if available
+                        let testKey = longToShortMap[cleanTest] || cleanTest;
+                        
+                        if (NUCMED_SCHEDULE[testKey]) {
+                            const availability = checkGenericTestAvailability(testKey, currentDay, NUCMED_SCHEDULE);
+                            const note = NUCMED_SCHEDULE[testKey].note ? ` (${NUCMED_SCHEDULE[testKey].note})` : '';
+                            
+                            // Revert back to original test name if it was a long name, otherwise use the key (TSH)
+                            const displayTestName = testKey === "VIT D" ? "VIT D" : testKey;
+                            
+                            // Add to a temporary set to ensure unique test reminders
+                            nucMedTestReminders.add(`${displayTestName}: ${availability}${note}`);
+                        }
+                    });
+                }
+            });
+
+            // 3. Consolidate and add the top-level red reminder only if NUCMED requests exist
+            if (hasNucMedRequest) {
+                let combinedReminders = Array.from(nucMedTestReminders).join(' | ');
+                let finalReminderText = `NUCMED TESTS REQUESTED: ${timeStatus} | Tests: ${combinedReminders || 'Check availability'}`;
+
+                reminders.add({
+                    text: `! ${finalReminderText} !`,
+                    critical: true,
+                    type: 'NUCMED' // Use a type for ordering
+                });
+            }
+        }
+        
+        /**
+         * Collects MRL-specific reminders and operational status.
+         */
+        function checkMRLStatus(forms, reminders) {
+            const now = new Date();
+            const currentHour = now.getHours(); 
+            const currentDay = now.getDay(); // 0=Sun, 1=Mon... 6=Sat
+            
+            // MRL is Monday (1) to Friday (5)
+            const isWeekday = currentDay >= 1 && currentDay <= 5; 
+            
+            // Hours: 8 AM (8) to 4 PM (16). Cutoff: 3 PM (15).
+            const isMRLOpen = isWeekday && (currentHour >= 8 && currentHour < 16);
+            const isCutoffMissed = isWeekday && (currentHour >= 15);
+            
+            let timeStatus = "MRL IS CLOSED";
+            if (!isWeekday) {
+                timeStatus = "MRL IS CLOSED (Weekend)";
+            } else if (isCutoffMissed) {
+                timeStatus = "MRL IS CLOSED (Submission Cut-Off: 3:00 PM)";
+            } else if (isMRLOpen) {
+                timeStatus = "MRL IS OPEN (8:00 AM - 4:00 PM)";
+            }
+
+            let hasMRLRequest = false;
+            const mrlTestReminders = new Set();
+            
+            forms.forEach(form => {
+                if (form.form_type.toUpperCase() === 'MRL') {
+                    hasMRLRequest = true;
+                    
+                    const requestedTests = form.requests_list.toUpperCase().split(',').map(t => t.trim()).filter(t => t.length > 0);
+
+                    requestedTests.forEach(test => {
+                        let cleanTest = test.replace(/^\[STAT\]\s*/, '').trim();
+                        
+                        // Check for specific TB tests (including those that map to TB GENEXPERT or MTB/RIF)
+                        const mrlTestKey = Object.keys(MRL_TB_TESTS).find(key => cleanTest.includes(key));
+                        
+                        // Check for Sputum TB GeneXpert specifically
+                        if (cleanTest.includes('SPUTUM') && (cleanTest.includes('TB GENEXPERT') || cleanTest.includes('MTB-RIF PCR'))) {
+                            mrlTestReminders.add(`${'TB PCR / MTB-RIF PCR (SPUTUM)'}: ${checkGenericTestAvailability('TB PCR / MTB-RIF PCR (SPUTUM)', currentDay, MRL_TB_TESTS)} (Requires TB-DOTS Referral)`);
+                        } else if (mrlTestKey) {
+                            const availability = checkGenericTestAvailability(mrlTestKey, currentDay, MRL_TB_TESTS);
+                            const note = MRL_TB_TESTS[mrlTestKey].note;
+                            
+                            mrlTestReminders.add(`${mrlTestKey}: ${availability} (${note})`);
+                        }
+                    });
+                }
+            });
+            
+            // Consolidate and add the top-level red reminder only if MRL requests exist
+            if (hasMRLRequest) {
+                let combinedReminders = Array.from(mrlTestReminders).join(' | ');
+                
+                // Construct the overall status message, accounting for test availability
+                let testStatusDetail = combinedReminders.length > 0 ? `| TB Tests: ${combinedReminders}` : '';
+                
+                let finalReminderText = `MRL TESTS REQUESTED: ${timeStatus} ${testStatusDetail}`;
+
+                reminders.add({
+                    text: `! ${finalReminderText} !`,
+                    critical: true,
+                    type: 'MRL' // Use a type for ordering
+                });
+            }
+        }
+
+
+        /**
+         * Processes the structured text (now read from the visible structured-input field) 
+         * and renders the forms.
+         */
+        function processStructuredText(structuredText) {
+            const previewsDiv = document.getElementById('form-previews');
+            previewsDiv.innerHTML = ''; 
+
+            if (!structuredText) {
+                console.error("Structured data is empty.");
+                previewsDiv.innerHTML = `<p style="color:red; font-size: 1.2rem; padding: 20px;">
+                    ERROR: Structured data is empty. Paste data into the Structured Data Editor.</p>`;
+                return false;
+            }
+
+            let formLines = structuredText.split('\n').filter(line => line.trim() !== '');
+            const initialCount = formLines.length;
+
+            // NEW RULE 1: Pad lines to a multiple of 4
+            const formsToPad = 4 - (initialCount % 4);
+            if (formsToPad > 0 && formsToPad < 4) {
+                // The standard empty line has 14 pipes for 15 fields
+                const emptyFormLine = '||||||||||||||'; 
+                for (let i = 0; i < formsToPad; i++) {
+                    formLines.push(emptyFormLine);
+                }
+            }
+            
+            // Update the structured input area with the padded lines (for manual review)
+            document.getElementById('structured-input').value = formLines.join('\n');
+
+            const finalFormsArray = [];
+            // Map to store material type -> { count: number, tests: string[] }
+            const materialDetails = {}; 
+            const reminders = new Set(); // Set to collect unique reminders (can hold strings or objects)
+            let cupCount = 0;
+            let bcsCount = 0; // Counter for Blood CS forms
+            
+            // Collect all tests requiring ice transport
+            const iceRequiredTests = new Set();
+            let isLactateRequested = false;
+
+            for (const line of formLines) {
+                const parts = line.split('|').map(p => p.trim());
+                
+                // CRITICAL CHECK: Ensure we still have 15 fields from the structured data source
+                if (parts.length !== 15) {
+                    // Only show error if the line wasn't empty padding
+                    if (line.trim().length > 0) {
+                        previewsDiv.innerHTML = `<p style="color:red; font-size: 1.2rem; padding: 20px;">
+                            ERROR: Expected 15 fields per line but found ${parts.length} in line: "${line.substring(0, 50)}...". Please check the Structured Data Editor.</p>`;
+                        return false;
+                    }
+                }
+
+                // If this is a padded/empty line, still create a form object with empty data
+                const form = {
+                    name: parts[0] || '',
+                    ward_location: parts[1] || '',
+                    age_sex: parts[2] || '',
+                    birthday: parts[3] || '',
+                    case_number: parts[4] || '',
+                    diagnosis: parts[5] || '',
+                    requested_by: parts[6] || '',
+                    date_collected: parts[7] || '',
+                    time_collected: parts[8] || '',
+                    collected_by: parts[9] || '',
+                    specimen_type: parts[10] || '',
+                    site_of_collection: parts[11] || '',
+                    form_type: parts[12] || '', 
+                    tube_top: parts[13] || '', 
+                    requests_list: parts[14] || ''
+                };
+                finalFormsArray.push(form);
+                
+                // Skip material/reminder logic for empty lines
+                if (form.name === '' && form.requests_list === '') continue; 
+
+                // --- Materials Count Logic ---
+                const tubeColor = form.tube_top.toUpperCase();
+                const requests = form.requests_list.toUpperCase();
+                
+                // Initialize material detail structure
+                if (!materialDetails[tubeColor]) {
+                    materialDetails[tubeColor] = { count: 0, tests: [] };
+                }
+
+                // Count tube tops and collect tests for hover info
+                if (tubeColor !== 'N/A' && tubeColor.length > 0) {
+                    materialDetails[tubeColor].count++;
+                    materialDetails[tubeColor].tests.push(requests);
+                }
+                
+                // Check if specimen requires a cup
+                const specimen = (form.specimen_type || '').toLowerCase();
+                if (CUP_SPECIMENS.includes(specimen)) {
+                    cupCount++;
+                    if (!materialDetails['SPECIMEN CUP']) {
+                        materialDetails['SPECIMEN CUP'] = { count: 0, tests: [] };
+                    }
+                    materialDetails['SPECIMEN CUP'].count++;
+                    materialDetails['SPECIMEN CUP'].tests.push(requests);
+                }
+
+                // NEW RULE 1: Count Blood Culture (BCS) forms
+                if (requests.includes('BLOOD CS') || requests.includes('BLOOD C/S')) {
+                    bcsCount++;
+                }
+
+
+                // --- Reminder Logic (General/Tube) ---
+                
+                // 1. Blue Top Precision (Any Blue Top Test)
+                if (tubeColor === 'BLUE') {
+                    reminders.add("BLUE TOP: Fill to the indicator line.");
+                }
+
+                // 2. Light-Sensitive Tests (TRIGGER ONLY FOR VANCO TROUGH as requested)
+                if (requests.includes('VANCO TROUGH')) {
+                    reminders.add("For Vanco Trough, Cover red top with carbon paper prior to extraction.");
+                }
+
+                // 3. Special Handling (Ice) - COLLECTION LOGIC
+                const ICE_SAMPLES = ['ICA', 'NH3', 'LACTATE']; 
+                ICE_SAMPLES.forEach(test => {
+                    if (requests.includes(test) || (test === 'ICA' && tubeColor === 'GREEN')) {
+                         iceRequiredTests.add(test);
+                         if (test === 'LACTATE') {
+                            isLactateRequested = true;
+                         }
+                    }
+                });
+                
+                // 4. Volume/Container Specifics
+                if (requests.includes('HBA1C')) {
+                    reminders.add("HbA1c: Fill to the line.");
+                }
+                if (requests.includes('ESR')) {
+                    reminders.add("ESR: Requires 2–4mL of blood and cannot use a microtainer (check tube type/volume).");
+                }
+            }
+            
+            // --- CONSOLIDATED ICE TRANSPORT REMINDER ---
+            if (iceRequiredTests.size > 0) {
+                const iceTests = Array.from(iceRequiredTests).filter(t => t !== 'LACTATE').sort().join(' and ');
+                
+                // Add Lactate specific instruction if applicable
+                if (isLactateRequested) {
+                    
+                    if (iceTests.length > 0) {
+                        // Adding a critical reminder for the general ice transport of other tests
+                        reminders.add({
+                            text: `ICE TRANSPORT: Use solid ice, place green top in glove. SEND IMMEDIATELY.`,
+                            critical: true,
+                            type: 'ICE'
+                        });
+                    }
+                    
+                    // Add the lactate-specific collection rule as a critical point
+                    reminders.add({
+                        text: "LACTATE COLLECTION: Do NOT tourniquet. Can use arterial blood. Send immediately on ice!",
+                        critical: true,
+                        type: 'ICE'
+                    });
+                } else {
+                    // If no Lactate, use the general ice instruction for the rest
+                    const allIceTests = Array.from(iceRequiredTests).sort().join(' and ');
+                    reminders.add({
+                        text: `ICE TRANSPORT: For **${allIceTests}** (Green Top), use solid crushed ice (indirect contact only). Improper transport leads to rejection.`,
+                        critical: true,
+                        type: 'ICE'
+                    });
+                }
+                
+            }
+            
+            // Apply BCS adjustment (New Rule 1)
+            // If any Blood CS forms exist, override the 'Special Bottle' count to be 2 per form (1 aerobic + 1 anaerobic)
+            if (bcsCount > 0) {
+                 // Use the Special Bottle key to track this material
+                if (!materialDetails['SPECIAL BOTTLE']) {
+                    materialDetails['SPECIAL BOTTLE'] = { count: 0, tests: ['Blood CS x 2 sites/BCS x 2'] };
+                }
+                materialDetails['SPECIAL BOTTLE'].count = bcsCount * 2;
+                // Add the material detail explicitly for the BCS bottle as it's a derived count, not a direct line count
+                // The tests array is already handled above in the loop, so just update the count.
+            }
+
+
+            // Run NUCMED checks
+            checkNucMedStatus(finalFormsArray.filter(f => f.name !== ''), reminders);
+            
+            // Run MRL checks (NEW)
+            checkMRLStatus(finalFormsArray.filter(f => f.name !== ''), reminders);
+            
+            // Final Material Details preparation (for the special BCS case and cleanup)
+            const finalMaterialDetails = {};
+            for (const key in materialDetails) {
+                if (key.includes('SPECIAL BOTTLE') && bcsCount > 0) {
+                    // Handle BCS special case: use the derived count and a fixed test list for simplicity
+                    finalMaterialDetails[key] = {
+                        count: bcsCount * 2,
+                        tests: [`Blood CS (Total Forms: ${bcsCount})`] 
+                    };
+                } else if (key === 'SPECIMEN CUP') {
+                     // Handle specimen cups as a consolidated item
+                     finalMaterialDetails[key] = {
+                        count: cupCount,
+                        tests: Array.from(new Set(materialDetails[key].tests.flat())) 
+                    };
+                } else if (key !== 'N/A') {
+                    // Filter out N/A forms, and consolidate test lists
+                    finalMaterialDetails[key] = {
+                        count: materialDetails[key].count,
+                        tests: Array.from(new Set(materialDetails[key].tests.flat()))
+                    };
+                }
+            }
+
+
+            renderForms(finalFormsArray);
+            renderMaterialEstimation(finalMaterialDetails);
+            renderReminders(reminders); // Call new render function
+            return true;
+        }
+
+
+        /**
+         * UPDATED: Renders the material estimation using columns and adds the hover title (tooltip).
+         * This function now formats the tests in the tooltip as a numbered list, grouped by form/test.
+         * @param {Object} materialDetails Map of material type -> { count: number, tests: string[] }
+         */
+        function renderMaterialEstimation(materialDetails) {
+            const materialContainer = document.getElementById('material-list-body-container'); 
+            materialContainer.innerHTML = ''; // Clear previous columns
+
+            // 1. Prepare items for sorting and display
+            const materialItems = [];
+
+            // Helper to clean and group tests
+            const groupAndFormatTests = (tests) => {
+                if (!tests || tests.length === 0) return '';
+                
+                // Flatten the requests_list strings and split by comma
+                const allTests = tests.flatMap(t => t.split(',').map(s => s.trim()))
+                                     .filter(s => s.length > 0);
+                
+                // Group tests that often appear together on the same form (e.g., Chemistry batch vs single test)
+                const groupedTests = {};
+
+                allTests.forEach(test => {
+                    // Use a grouping key for common panels (like CHEM, IMMUNO, etc.) or just the test name
+                    const testUpper = test.toUpperCase();
+                    let groupKey = testUpper;
+
+                    if (["NA", "K", "CL", "MG", "PO4", "FBS", "TRIGLYCERIDES", "TOTAL CHOLESTEROL", "LDL", "HDL", "AST", "ALT", "TB", "DB", "IB", "GGT", "ALP", "TPAG", "LDH", "BUN", "CREA", "AMYLASE", "LIPASE", "ALBUMIN", "BUA", "TCO2"].some(t => testUpper.includes(t))) {
+                        groupKey = "Chemistry Panel/Tests";
+                    } else if (["CRP", "CA-125", "BHCG", "HBSAG", "ANTI-HBS", "ANTI-HBC TOTAL", "HBEAG", "ANTI-HBE", "ANTI-HAV IGM", "ANTI-HCV", "ANTI-HBC IGM", "PROCALCITONIN", "AFP", "CA 19-9", "CEA", "HE 4"].some(t => testUpper.includes(t))) {
+                        groupKey = "Immunopathology Panel/Tests";
+                    } else if (testUpper.includes("URINALYSIS") || testUpper.includes("UA")) {
+                         groupKey = "Urinalysis";
+                    } else if (testUpper.includes("BLOOD CS") || testUpper.includes("BCS")) {
+                        groupKey = "Blood Culture";
+                    }
+
+                    if (!groupedTests[groupKey]) {
+                        groupedTests[groupKey] = new Set();
+                    }
+                    groupedTests[groupKey].add(test);
+                });
+
+                let formattedList = "Tests:";
+                let itemNumber = 1;
+
+                // Combine all unique tests into the final string
+                Object.keys(groupedTests).sort().forEach(groupKey => {
+                    // Extract unique test names from the set
+                    const uniqueTests = Array.from(groupedTests[groupKey]).sort().join(', ');
+                    
+                    // Format and append to the list
+                    formattedList += `\n${itemNumber}. ${uniqueTests}`;
+                    itemNumber++;
+                });
+
+                return formattedList;
+            };
+
+            // 2. Handle Tube Tops and Special Materials
+            const sortedKeys = Object.keys(materialDetails).sort();
+            sortedKeys.forEach(key => {
+                const item = materialDetails[key];
+                const count = item.count;
+                const tests = item.tests;
+                
+                let materialName;
+                let colorClass = `tube-color-${key.replace(/\s/g, '-').toUpperCase()}`;
+                
+                if (key.includes('SPECIAL BOTTLE')) {
+                    materialName = (count === 1 ? 'BCS BOTTLE' : 'BCS BOTTLES');
+                    colorClass = 'tube-color-BROWN'; 
+                } else if (key.includes('4 SPECIAL TUBES')) {
+                    materialName = (count === 1 ? 'SPECIAL TUBE' : 'SPECIAL TUBES');
+                    materialName = `4 ${materialName}`;
+                    colorClass = 'tube-color-GREY'; 
+                } else if (key === 'SPECIMEN CUP') {
+                    materialName = (count === 1 ? 'SPECIMEN CUP' : 'SPECIMEN CUPS');
+                    colorClass = 'tube-color-SPECIMEN-CUP';
+                } else {
+                    materialName = (count === 1 ? 'TOP' : 'TOPS'); 
+                    materialName = `${key} ${materialName}`;
+                }
+
+                // Create hover text: formatted list of unique tests involved
+                const hoverTitle = groupAndFormatTests(tests);
+                const titleText = hoverTitle.length > 0 ? hoverTitle : `${materialName} (No specific test listed)`;
+                
+                materialItems.push({
+                    html: `<span class="${colorClass}" title="${titleText}">${count} ${materialName}</span>`,
+                    sortKey: key
+                });
+            });
+            
+            // Check if there are materials to display
+            const hasMaterials = materialItems.length > 0;
+            const estimationBox = document.getElementById('materials-estimation');
+            const estimationBoxContainer = document.getElementById('materials-estimation-box');
+
+            if (hasMaterials) {
+                 // Sort materials by color/type
+                materialItems.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+                // Split items into columns with max 3 lines each
+                const maxLinesPerColumn = 3;
+                let currentColumn = document.createElement('ul');
+                currentColumn.className = 'material-column';
+                materialContainer.appendChild(currentColumn);
+                
+                materialItems.forEach((item, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = item.html;
+                    
+                    // If the current column already has 3 items, create a new column
+                    if (currentColumn.children.length >= maxLinesPerColumn) {
+                        currentColumn = document.createElement('ul');
+                        currentColumn.className = 'material-column';
+                        materialContainer.appendChild(currentColumn);
+                    }
+                    currentColumn.appendChild(listItem);
+                });
+                
+                estimationBoxContainer.style.display = 'block';
+
+            } else {
+                estimationBoxContainer.style.display = 'none';
+            }
+        }
+        
+        /**
+         * UPDATED: Renders the important reminders list, handling the custom critical object,
+         * and ordering the NUCMED/MRL/ICE reminders first.
+         */
+        function renderReminders(reminders) {
+            const remindersSection = document.getElementById('reminders-section');
+            const reminderList = document.getElementById('reminder-list-body');
+            const groupContainer = document.getElementById('materials-and-reminders-group');
+            const remindersBoxContainer = document.getElementById('reminders-section-box');
+            
+            // Clear previous list
+            reminderList.innerHTML = ''; 
+            
+            let reminderArray = Array.from(reminders);
+
+            // Separate critical (NUCMED/MRL/ICE) and standard reminders
+            const criticalReminders = [];
+            const standardReminders = [];
+
+            reminderArray.forEach(item => {
+                if (typeof item === 'object' && item.critical) {
+                    criticalReminders.push(item);
+                } else if (typeof item === 'string') {
+                    standardReminders.push(item);
+                }
+            });
+            
+            // Sort critical reminders (NUCMED first, then MRL, then ICE, then others)
+            criticalReminders.sort((a, b) => {
+                const order = { 'NUCMED': 1, 'MRL': 2, 'ICE': 3 };
+                const aOrder = order[a.type] || 99;
+                const bOrder = order[b.type] || 99;
+                return aOrder - bOrder;
+            });
+            
+            // Combine all reminders in the desired order
+            const finalReminders = [...criticalReminders, ...standardReminders];
+
+
+            // Render all reminders
+            finalReminders.forEach(item => {
+                const listItem = document.createElement('li');
+                let textContent;
+                let isCritical = false;
+
+                if (typeof item === 'object' && item.critical) {
+                    textContent = item.text; // Text already contains '!'
+                    isCritical = true;
+                } else if (typeof item === 'string') {
+                    textContent = item;
+                    // Apply critical style to existing high-risk rejection samples (Coag, Light)
+                    if (textContent.includes("BLUE TOP") || textContent.includes("LIGHT SENSITIVE")) {
+                        isCritical = true;
+                    }
+                }
+                
+                // CRITICAL REMINDER TEXT ADJUSTMENT
+                if (isCritical) {
+                    listItem.className = 'critical-reminder';
+                }
+                
+                listItem.textContent = textContent;
+                reminderList.appendChild(listItem);
+            });
+
+            // Decide whether to show the entire group
+            const materialsVisible = document.getElementById('materials-estimation-box').style.display !== 'none';
+            
+            if (materialsVisible || (reminderList.children.length > 0)) { 
+                 groupContainer.style.display = 'flex';
+                 remindersBoxContainer.style.display = 'block';
+            } else {
+                 groupContainer.style.display = 'none';
+                 remindersBoxContainer.style.display = 'none';
+            }
+        }
+
+
+        function renderForms(forms) {
+            const previewsDiv = document.getElementById('form-previews');
+            previewsDiv.innerHTML = '';
+            
+            for (const form of forms) {
+                const ageSexData = cleanAgeSex(form.age_sex);
+
+                const formContainer = document.createElement('div');
+                formContainer.className = 'form-container';
+                
+                const formPreview = document.createElement('div');
+                formPreview.className = `form-preview lrf-coords`;
+                
+                // Consolidate all field creation logic
+                const fieldsToCreate = [
+                    ...renderFields.filter(f => f.key), 
+                    { key: 'age', class: 'age-sex-age', title: 'AGE', defaultFontSize: 16 },
+                    { key: 'sex', class: 'age-sex-sex', title: 'SEX', defaultFontSize: 16 },
+                    { key: 'requests', class: 'requests-field', title: 'LAB EXAM', element: 'textarea', defaultFontSize: 16, isMultiLine: true },
+                ];
+                
+                fieldsToCreate.forEach(field => {
+                    const ElementType = field.element === 'textarea' ? 'textarea' : 'input';
+                    const input = document.createElement(ElementType);
+                    if (ElementType === 'input') {
+                        input.type = 'text';
+                    }
+                    
+                    let value;
+                    if (field.key === 'age') {
+                        value = ageSexData.age;
+                    } else if (field.key === 'sex') {
+                        value = ageSexData.sex;
+                    } else if (field.key === 'requests') {
+                        // The 'true' flag tells the function to *not* insert line breaks (only commas)
+                        value = formatMultiLineText(form.requests_list, true); 
+                    } else if (field.key === 'diagnosis') {
+                        // The 'false' flag tells the function to keep its original behavior (insert line breaks for large comma lists)
+                        value = formatMultiLineText(form.diagnosis, false); 
+                    } else {
+                        value = field.key === 'name' ? (form.name || '').toUpperCase() : form[field.key] || '';
+                    }
+
+                    input.value = value;
+                    input.className = `overlay-field ${field.class}`; 
+                    input.title = field.title; 
+                    
+                    // CRITICAL CHANGE: Set initial font size to the default size, NO SHRINK-TO-FIT YET
+                    input.style.fontSize = field.defaultFontSize + 'px';
+                    input.setAttribute('data-base-size', field.defaultFontSize); // Store initial size
+
+                    // New: Add double-click handler for the font setter
+                    input.addEventListener('dblclick', function(e) {
+                        showFontSizeSetter(e.target);
+                    });
+                    
+                    // Keep the text area editable on single click/focus
+                    input.addEventListener('focus', function(e) {
+                         // If the size setter is open, close it on focus to start editing
+                         if (document.activeElement.id !== 'manual-font-size-input') {
+                             hideFontSizeSetter();
+                         }
+                    });
+
+                    // Hide the setter if the field loses focus AND the setter isn't focused
+                    input.addEventListener('blur', function(e) {
+                          // Check if focus went to the global setter input
+                          setTimeout(() => {
+                              if (document.activeElement.id !== 'manual-font-size-input') {
+                                  hideFontSizeSetter();
+                              }
+                          }, 10);
+                    });
+
+                    formPreview.appendChild(input);
+                });
+                
+                formContainer.appendChild(formPreview);
+                previewsDiv.appendChild(formContainer);
+            }
+            
+            // Global click handler to dismiss the setter if clicking anywhere else
+            document.addEventListener('click', (e) => {
+                const target = e.target;
+                if (!target.closest('.overlay-field') && target.id !== 'manual-font-size-input' && target.closest('#global-font-setter-container') === null) {
+                    hideFontSizeSetter();
+                }
+            });
+        }
+
+        /**
+         * Retrieves data from the structured field, proceeds to render, 
+         * and applies shrink-to-fit logic and shows the print button.
+         */
+        function processRequestAndShowPDFButton() {
+            const structuredText = document.getElementById('structured-input').value.trim(); // Reads from visible editor
+            // Clear any old error messages
+            document.getElementById('form-previews').innerHTML = '';
+            
+            if (processStructuredText(structuredText)) {
+                // NEW: Apply the shrink-to-fit logic globally after rendering is complete
+                applyAllShrinkToFit(); 
+                
+                // Show the main PDF button in the header
+                document.getElementById('pdfButton').style.display = 'inline-block';
+            }
+        }
+
+        function generatePDF() {
+            window.print();
+        }
+
+    </script>
+</body>
+</html>
