@@ -1492,13 +1492,21 @@ TB PCR / MTB/Rif / GeneXpert (BF)|Body Fluid|N/A|MRL`;
                 .replace("__COLLECTOR_DEFAULT__", collectorInput)
                 .replace("__DATE_DEFAULT__", dynamicDate);
             
-          // --- USE CLOUDFLARE WORKER INSTEAD OF DIRECT GEMINI CALL ---
-loadingStatus.style.display = 'flex';
-structuredInputArea.value = "Processing data...";
-previewsDiv.innerHTML = ''; // Clear previous preview error/message
+            // --- CRITICAL API KEY CHECK ---
+            const apiKey = "AIzaSyCbXHcghf5sGEfC1OV6zngroFML3lCnC1I"; // This is intentionally left blank for the environment to inject it.
+            if (typeof __api_key === 'undefined' && apiKey === "") {
+                 previewsDiv.innerHTML = `<p style="color:red; font-size: 1.2rem; padding: 20px;">
+                    **AUTHORIZATION ERROR:** The Gemini API key is missing. The environment must provide a key for the Auto-Fill feature to work.</p>`;
+                return;
+            }
 
-const userQuery = unstructuredText;
-const apiUrl = "https://talongapi.gmfernandez2.workers.dev/api/gemini"; // <-- Cloudflare Worker endpoint
+            // Display loading indicator (beside button)
+            loadingStatus.style.display = 'flex';
+            structuredInputArea.value = "Processing data...";
+            previewsDiv.innerHTML = ''; // Clear previous preview error/message
+
+            const userQuery = unstructuredText;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
@@ -1516,11 +1524,10 @@ const apiUrl = "https://talongapi.gmfernandez2.workers.dev/api/gemini"; // <-- C
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const response = await fetch(apiUrl, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ prompt: userQuery }),
-});
-
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
                     if (!response.ok) {
                         // Handle 403 specifically to provide a clear error message
