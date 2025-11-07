@@ -4,9 +4,51 @@
 <link rel="icon" type="image/png" href="logo.png?" /> 
 <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap" rel="stylesheet">
 <title>PGH TALONG</title>
-<!-- CRITICAL FOR MOBILE RESPONSIVENESS -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+    
+/* --- New Tab Bar Styles --- */
+#main-nav-bar {
+    margin-left: 20px;
+    padding-bottom: 0;
+}
+
+.nav-tab {
+    padding: 10px 15px;
+    margin-right: 5px;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    color: #343a40;
+    border: 2px solid;
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.nav-tab.active {
+    background-color: #0a4627;
+    border: 2px
+    border-bottom: 1px solid #ffffff; /* visually connect to the content area */
+    color: #0a4627;
+    font-weight: 700;
+    color: #FFFFFF
+}
+
+.nav-tab:hover:not(.active) {
+    background-color: #e0e0e0;
+}
+
+/* --- Content Toggling Styles (CRITICAL) --- */
+.tool-content {
+    display: none; /* Hide all content sections by default */
+    min-height: 500px; /* Ensure space when content is hidden */
+}
+
+.tool-content.active {
+    display: block; /* Only show the currently active section */
+}
+
 /* --- General Page & Input Styling (Screen View) - UPDATED FOR AESTHETICS --- */
 body {
     font-family: 'Kumbh sans', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,8 +99,6 @@ body {
 #form-header-container #pdfButton:hover {
     background-color: #c82333;
 }
-
-
 p {
     margin-bottom: 8px;
     line-height: 1.4;
@@ -624,6 +664,11 @@ input:checked + .slider:before {
     /* CRITICAL: Hide the new instruction box and its content for printing */
     #preview-instructions { display: none !important; }
 
+    
+    /* Hide the main nav bar */
+
+    #main-nav-bar { display: none !important; }
+
     body { 
         margin: 0 ; 
         padding: 0 ; /* Set body padding to zero */
@@ -688,20 +733,27 @@ input:checked + .slider:before {
         white-space: pre-wrap !important;
     }
 }
+
 </style>
 </head>
 <body>
+    
+<!-- NEW: Wrapper for H2 and Logo -->
+<nav id="main-nav-bar">
+    <button class="nav-tab active" data-target="form-tool-content">Form Generator</button>
+    <button class="nav-tab" data-target="second-tool">Second Tool Name</button>
+    <button class="nav-tab" data-target="third-tool">Third Tool Name</button>
+</nav>
 
+<!-- FIRST TAB: FORM GENERATOR -->
+<div id="form-tool-content" class="tool-content active">
     <div id="input-section">
         <div id="global-font-setter-container">
         </div>
-
-            <!-- NEW: Wrapper for H2 and Logo --><div id="title-logo-wrapper">
+            <!-- NEW: Wrapper for H2 and Logo -->
+             <div id="title-logo-wrapper">
                 <img id="logo-image" src="logo.png" alt="PGH Logo">
             <h2><span style="color: #007bff; margin-left:10px"></span>Task Automation for Laboratory Orders and Needs Generator</h2>
-
-            <!-- Replaced placeholder with actual image -->
-
         </div>
         
         <!-- NEW COLLECTED BY, TIME, AND ER TOGGLE INPUT FIELDS -->
@@ -812,7 +864,17 @@ Time 11:30 am today.
     </div>
     <div id="form-previews">
     </div>
-
+</div>
+<div id="second-tool" class="tool-content">
+    <div id="input-section">
+    <h2>Coming Soon..</h2>
+    </div>
+    </div>
+<div id="third-tool" class="tool-content">
+    <div id="input-section">
+    <h2>Coming Soon..</h2>
+    </div>
+    </div>
 <script>
         // --- GEMINI API CONFIGURATION ---
 
@@ -878,10 +940,10 @@ You MUST STRICTLY FOLLOW ALL RULES BELOW:
 -- Lab Requests (Test Name) Rules --
 - Test Name Format: Use specified shortcuts (e.g., Na, K, Crea, CBC, TB, DB, IB, BUA, Trop I, Vanco Trough) from the lookup table.
 - Test Name Renaming: You MUST use **'Phos' instead of 'PO4'** for all requests.
-- **Lipid Profile Grouping:** If the request includes all four tests (Triglycerides, Total cholesterol, LDL, and HDL), you MUST group them onto one form and set the requests_list field to: '**Lipid profile**'.
+- **Lipid Profile Grouping:** If the request includes all four tests (Triglycerides, Total cholesterol, LDL, and HDL), you MUST group them onto one form and set the requests_list field to: '**Lipid profile**'. Still include it along with other blood red top chemistry.
 - Specimen Prefix Rule (Non-Blood): For all non-blood specimens (**including ETA, Pleural Fluid, Ascitic Fluid, and Pericardial Fluid**), prefix the test name with the Specimen Type (e.g., Stool DFS, Pleural Fluid TP).
 - **ETA Handling:** If the original text mentions 'Endotracheal Aspirate' or 'ETA', the Specimen Type MUST be output as **'ETA'** (not Sputum). All associated tests must use the 'ETA' prefix (e.g., ETA GS/CS).
-- Urinalysis Exception: If any test from the Urinalysis Form is requested, the Lab Requests field for that line must contain only the word: Urinalysis. Do not include the "Urine" prefix.
+- Urinalysis and Fecalysis Exception: If any test from the Urinalysis Form is requested, the Lab Requests field for that line must contain only the word: Urinalysis. Do not include the "Urine" prefix. Similar with fecalysis, do not include the "Stool" prefix
 - Urine Chemistry Prefix: All other Urine tests (e.g., Chemistry, Microbiology) must use the Urine prefix (e.g., Urine Na, Urine Crea, Urine GS/CS).
 
 -- LAB TEST LOOKUP TABLE (Table Basis) --
@@ -1064,7 +1126,7 @@ MTB/Rif (CSF)|CSF|N/A|MRL
 TB GeneXpert (CSF)|CSF|N/A|MRL
 HSV PCR (CSF)|CSF|N/A|MRL
 Cytology (CSF)|CSF|N/A|Surgical Pathology
-DFS (w/ Conc)|Stool|N/A|Clinical Microscopy
+Fecalysis|Stool|N/A|Clinical Microscopy
 FIT|Stool|N/A|Clinical Microscopy
 FOBT|Stool|N/A|Clinical Microscopy
 Crypto/Giardia Ag|Stool|N/A|Clinical Microscopy
@@ -1877,7 +1939,7 @@ GeneXpert|ETA|N/A|Special`;
             const rawInput = document.getElementById('unstructured-input').value.toUpperCase();
             if (rawInput.includes('ABG')) {
                 reminders.add({
-                    text: "ABG REMINDER: For ABG, use 1cc tuberculin needle with 0.1 mL heparin, send with details written on a micropore.",
+                    text: "For ABG: Use 1cc tuberculin needle with 0.1 mL heparin, send with details written on a micropore.",
                     critical: true,
                     type: 'ABG_SPECIFIC'
                 });
@@ -1993,6 +2055,7 @@ GeneXpert|ETA|N/A|Special`;
                 if (requests.includes('ESR')) {
                     reminders.add("ESR: Requires 2–4mL of blood and cannot use a microtainer (check tube type/volume).");
                 }
+
             }
             
             // --- CONSOLIDATED ICE TRANSPORT REMINDER ---
@@ -2403,7 +2466,73 @@ GeneXpert|ETA|N/A|Special`;
                 });
             });
         });
+    // --- NEW TAB SWITCHING LOGIC (CRITICAL FOR FIX) ---
 
+        /**
+         * Switches the visible tool/page content based on the navigation tabs.
+         * @param {string} targetId The ID of the content div to show.
+         */
+        function switchToolContent(targetId) {
+            // 1. Hide all content containers
+            document.querySelectorAll('.tool-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 2. Deactivate all tab buttons
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 3. Show the target content container
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+
+            // 4. Activate the clicked button
+            const clickedButton = document.querySelector(`.nav-tab[data-target="${targetId}"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+        }
+        
+        // --- INITIALIZATION ---
+        window.addEventListener('load', () => {
+            loadSettings();
+            
+            // 1. Set up tab switching listeners
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const targetId = e.target.getAttribute('data-target');
+                    if (targetId) {
+                        switchToolContent(targetId);
+                    }
+                });
+            });
+
+            // CRITICAL FIX: Ensure the main forms tab is the one visible on load
+            switchToolContent('form-tool-content');
+
+            // 2. Save settings AND trigger refresh on toggle/input change (if structured data is present)
+            const controlsToRefresh = [
+                document.getElementById('er-toggle'),
+                document.getElementById('collector-input'),
+                document.getElementById('time-collected-input')
+            ];
+
+            controlsToRefresh.forEach(control => {
+                control.addEventListener(control.type === 'checkbox' ? 'change' : 'input', () => {
+                    // Only save persistent settings (Collector and ER Toggle)
+                    saveSettings();
+                    
+                    const structuredText = document.getElementById('structured-input').value.trim();
+                    if (structuredText) {
+                        // Use a slight delay to ensure the save operation completes if needed
+                        setTimeout(processRequestAndShowPDFButton, 50);
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
